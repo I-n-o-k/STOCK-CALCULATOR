@@ -1,0 +1,249 @@
+/* style.css - FINAL RESPONSIVE FIX */
+
+/* --- GENERAL STYLES & LAYOUT --- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0; 
+    padding: 0; 
+    background-color: #f4f4f9; 
+    display: flex;
+    justify-content: center; 
+    align-items: flex-start; 
+    min-height: 100vh; 
+}
+
+.container {
+    width: 100%; 
+    max-width: 900px; 
+    margin: 0; 
+    padding: 10px; 
+    background: #fff;
+    border-radius: 0; 
+    box-shadow: none; 
+}
+@media (min-width: 769px) {
+    .container {
+        margin: 20px 10px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+h2 {
+    text-align: left; 
+    color: #333;
+    margin-top: 0; 
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff; 
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #555;
+    margin-top: 30px;
+}
+
+/* --- TABLE STYLES (Desktop/Tablet) --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    table-layout: fixed; 
+}
+
+/* Penentuan lebar kolom spesifik untuk tampilan desktop */
+table thead th:nth-child(1) { width: 20%; } 
+table thead th:nth-child(2), table thead th:nth-child(3), table thead th:nth-child(4) { width: 12%; } 
+table thead th:nth-child(5) { width: 14%; } 
+table thead th:nth-child(6) { width: 14%; } 
+table thead th:nth-child(7) { width: 8%; } 
+
+
+th, td {
+    border: 1px solid #e0e0e0; 
+    padding: 8px;
+    text-align: center; 
+    vertical-align: middle;
+    font-size: 0.85em; 
+}
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    white-space: nowrap; 
+    padding: 10px 5px; 
+}
+
+td:first-child {
+    text-align: left;
+    font-weight: 500;
+    white-space: normal;
+}
+
+/* --- INPUT & CONTROLS --- */
+input[type="number"] {
+    width: 35px; 
+    padding: 4px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -moz-appearance: textfield; 
+    margin: 0 1px; 
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: auto;
+}
+.control-btn {
+    padding: 4px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+    line-height: 1;
+    width: 18px; 
+    height: 18px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+}
+
+/* --- FOOTER STYLES (untuk kolom Total Stok saja) --- */
+/* Sembunyikan baris Grand Total (Alternatif CSS) */
+table tfoot .total-row:nth-child(1), 
+#selisih-table tfoot .total-row {
+    display: none;
+}
+
+.total-row td {
+    font-weight: bold;
+    background-color: #e9ecef;
+    border-top: 2px solid #ccc;
+    text-align: right;
+}
+
+.hapus-btn {
+    background-color: #ffc107 !important; 
+    color: #333 !important; 
+    border: none; 
+    padding: 5px 8px; 
+    border-radius: 4px; 
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+/* --- STYLE UNTUK TABEL SELISIH --- */
+#selisih-table {
+    margin-top: 15px;
+}
+#selisih-body tr {
+    display: table-row; 
+}
+#selisih-table td {
+    text-align: left;
+}
+#selisih-body td:last-child {
+    font-weight: bold;
+    text-align: center;
+    font-size: 1em;
+}
+.selisih-positive { background-color: #d4edda; color: #155724; }
+.selisih-negative { background-color: #f8d7da; color: #721c24; }
+.selisih-zero { background-color: #fff3cd; color: #856404; }
+#grand-total-selisih { background-color: #adb5bd !important; color: #333; font-size: 1.2em; }
+
+
+/* ====================================================== */
+/* MEDIA QUERY (RESPONSIVE MOBILE) - TAMPILAN KARTU       */
+/* ====================================================== */
+
+@media screen and (max-width: 768px) {
+    thead {
+        display: none;
+    }
+
+    table, tbody, tr, td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box; 
+    }
+
+    /* Hilangkan kolom sisa di footer utama di mobile */
+    table tfoot tr td[colspan="2"] {
+        display: none; 
+    }
+    
+    #stock-body tr, #selisih-body tr {
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    td {
+        border: none; 
+        border-bottom: 1px solid #eee;
+        text-align: right;
+        padding-left: 50%; 
+        position: relative;
+    }
+    
+    td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 50%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #555;
+    }
+
+    td:first-child {
+        text-align: left;
+        font-weight: bold;
+        color: #007bff;
+        border-top: none;
+    }
+    
+    td:nth-child(5) {
+        font-size: 1.1em;
+        background-color: #f0f8ff;
+    }
+
+    td:last-child {
+        text-align: center;
+        border-bottom: none;
+        padding: 10px 0;
+    }
+
+    .total-row td {
+        border-top: 1px solid #ccc;
+        margin-top: 15px;
+        font-size: 1em;
+        padding-left: 10px; 
+        padding-right: 10px;
+    }
+
+    #selisih-table td {
+        padding-left: 50%;
+    }
+    
+    .selisih-header th {
+        display: none;
+    }
+}
