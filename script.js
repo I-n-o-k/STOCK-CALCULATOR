@@ -1,282 +1,4 @@
-s).forEach(row => {
-        const providerName = row.getAttribute('data-provider');
-        
-        if (selectedProvider === 'Semua' || providerName === selectedProvider) {
-            row.style.display = displayStyle;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    // 2. Filter Tabel Selisih
-    Array.from(selisihBody.rows).forEach(row => {
-        const providerName = row.getAttribute('data-provider');
-        const isSelisihZero = row.cells[1].textContent === '0';
-
-        const isProviderMatch = selectedProvider === 'Semua' || providerName === selectedProvider;
-        
-        if (isProviderMatch && !isSelisihZero) {
-            row.style.display = displayStyle;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-function clearZero(element) {
-    if (element.value === '0') {
-        element.value = '';
-    }
-}
-
-function resetZero(element, rowId) {
-    if (element.value === '') {
-        element.value = '0';
-    }
-    const idPrefix = element.id.split('_')[0];
-    if (idPrefix === 'komputer') {
-        hitungSelisih(rowId);
-    } else {
-        hitungTotal(rowId);
-    }
-    saveStockData();
-    sendRowUpdate(rowId);
-}
-
-// --- FUNGSI KALKULATOR UTAMA ---
-let itemCounter = 0;
-const headerLabels = [
-    "Nama Paket", "Display Atas", "Display Bawah", "Display Belakang", 
-    "Total Fisik", "Stok Komputer", "Aksi"
-];
-
-function ubahStokKomputer(idInput, operasi) {
-    const inputElement = document.getElementById(idInput);
-    let nilaiSaatIni = parseInt(inputElement.value) || 0;
-    let rowId = idInput.split('_')[1]; // fix bug: use idInput
-
-    if (operasi === 'plus') {
-        nilaiSaatIni += 1;
-    } else if (operasi === 'minus' && nilaiSaatIni > 0) {
-        nilaiSaatIni -= 1;
-    }
-    
-    inputElement.value = nilaiSaatIni;
-    hitungSelisih(rowId); 
-    filterProducts(document.getElementById('provider-filter').value); 
-    saveStockData();
-    sendRowUpdate(rowId);
-}
-
-function ubahStok(idInput, operasi) {
-    const inputElement = document.getElementById(idInput);
-    let nilaiSaatIni = parseInt(inputElement.value) || 0;
-    let rowId = idInput.split('_')[1]; // fix bug: use idInput
-
-    if (operasi === 'plus') {
-        nilaiSaatIni += 1;
-    } else if (operasi === 'minus' && nilaiSaatIni > 0) {
-        nilaiSaatIni -= 1;
-    }
-    
-    inputElement.value = nilaiSaatIni;
-    hitungTotal(rowId); 
-    filterProducts(document.getElementById('provider-filter').value); 
-    saveStockData();
-    sendRowUpdate(rowId);
-}
-
-function hitungTotal(rowId) {
-    const displayAtas = parseInt(document.getElementById('atas_' + rowId).value) || 0;
-    const displayBawah = parseInt(document.getElementById('bawah_' + rowId).value) || 0;
-    const displayBelakang = parseInt(document.getElementById('belakang_' + rowId).value) || 0;
-    
-    const totalFisik = displayAtas + displayBawah + displayBelakang; 
-
-    document.getElementById('total_fisik_' + rowId).textContent = totalFisik;
-    
-    hitungSelisih(rowId); 
-    hitungGrandTotal();
-}
-
-function hitungSelisih(rowId) {
-    const totalFisik = parseInt(document.getElementById('total_fisik_' + rowId).textContent) || 0;
-    const stokKomputer = parseInt(document.getElementById('komputer_' + rowId).value) || 0;
-    const selisih = totalFisik - stokKomputer;
-    const selisihElement = document.getElementById('selisih_nilai_' + rowId);
-    const selisihRow = document.getElementById('selisih_row_' + rowId);
-
-    let selisihTeks;
-    let selisihClass;
-
-    if (selisih > 0) {
-        selisihTeks = `+${selisih}`;
-        selisihClass = 'selisih-positive';
-    } else if (selisih < 0) {
-        selisihTeks = `${selisih}`;
-        selisihClass = 'selisih-negative';
-    } else {
-        selisihTeks = '0';
-        selisihClass = 'selisih-zero';
-    }
-
-    selisihElement.textContent = selisihTeks;
-    selisihRow.className = selisihClass;
-    
-    filterProducts(document.getElementById('provider-filter').value);
-
-    hitungGrandTotalSelisih();
-}
-
-function hitungGrandTotal() {
-    let grandTotalFisik = 0;
-    const fisikElements = document.querySelectorAll('[id^="total_fisik_"]'); 
-    fisikElements.forEach(element => {
-        grandTotalFisik += parseInt(element.textContent) || 0;
-    });
-    document.getElementById('grand-total-fisik').textContent = grandTotalFisik;
-}
-
-function hitungGrandTotalSelisih() {
-    let grandTotal = 0;
-    const stockRows = document.getElementById('stock-body').rows;
-
-    Array.from(stockRows).forEach(row => {
-        const rowId = row.id.split('_')[1];
-        const totalFisik = parseInt(document.getElementById('total_fisik_' + rowId).textContent) || 0;
-        const stokKomputer = parseInt(document.getElementById('komputer_' + rowId).value) || 0;
-        grandTotal += (totalFisik - stokKomputer);
-    });
-
-    let selisihTeks = (grandTotal > 0) ? `+${grandTotal}` : String(grandTotal);
-    document.getElementById('grand-total-selisih').textContent = selisihTeks;
-}
-
-function resetBarang(rowId) {
-    document.getElementById('atas_' + rowId).value = 0;
-    document.getElementById('bawah_' + rowId).value = 0;
-    document.getElementById('belakang_' + rowId).value = 0;
-    document.getElementById('komputer_' + rowId).value = 0; 
-
-    hitungTotal(rowId); 
-    filterProducts(document.getElementById('provider-filter').value); 
-    saveStockData();
-    sendRowUpdate(rowId);
-}
-
-function tambahBarang(namaAwal = `Paket Baru ${itemCounter + 1}`, stokKomputer, stokAtas, stokBawah, stokBelakang) {
-    itemCounter++;
-    const rowId = itemCounter;
-    const tbody = document.getElementById('stock-body');
-    const tbodySelisih = document.getElementById('selisih-body');
-    
-    const newRow = tbody.insertRow();
-    newRow.id = 'row_' + rowId;
-
-    const providerName = namaAwal.split(' | ')[0]; 
-    newRow.setAttribute('data-provider', providerName); 
-
-    newRow.insertCell().setAttribute('data-label', headerLabels[0]);
-    newRow.cells[0].textContent = namaAwal;
-
-    const createControlCell = (colIndex, initialValue, isComputer = false) => {
-        const idPrefix = isComputer ? 'komputer' : ['atas', 'bawah', 'belakang'][colIndex - 2];
-        const inputId = `${idPrefix}_${rowId}`;
-        
-        let inputAttributes = `value="${initialValue}" id="${inputId}" min="0" `;
-        
-        if (isComputer) {
-            inputAttributes += `
-                oninput="hitungSelisih(${rowId}); saveStockData(); sendRowUpdate(${rowId});" 
-                onfocus="clearZero(this)" 
-                onblur="resetZero(this, ${rowId})"
-            `;
-            
-            return `
-                <div class="control-group">
-                    <button class="control-btn btn-minus" onclick="ubahStokKomputer('${inputId}', 'minus')">-</button>
-                    <input type="number" ${inputAttributes}>
-                    <button class="control-btn btn-plus" onclick="ubahStokKomputer('${inputId}', 'plus')">+</button>
-                </div>
-            `;
-        }
-        
-        const eventHandler = `oninput="hitungTotal(${rowId}); saveStockData(); sendRowUpdate(${rowId});"`;
-        inputAttributes += `
-             onfocus="clearZero(this)" 
-             onblur="resetZero(this, ${rowId})"
-        `;
-        
-        return `
-            <div class="control-group">
-                <button class="control-btn btn-minus" onclick="ubahStok('${inputId}', 'minus')">-</button>
-                <input type="number" ${inputAttributes} ${eventHandler}>
-                <button class="control-btn btn-plus" onclick="ubahStok('${inputId}', 'plus')">+</button>
-            </div>
-        `;
-    };
-
-    newRow.insertCell().setAttribute('data-label', headerLabels[1]);
-    newRow.cells[1].innerHTML = createControlCell(2, stokAtas);
-
-    newRow.insertCell().setAttribute('data-label', headerLabels[2]);
-    newRow.cells[2].innerHTML = createControlCell(3, stokBawah);
-
-    newRow.insertCell().setAttribute('data-label', headerLabels[3]);
-    newRow.cells[3].innerHTML = createControlCell(4, stokBelakang);
-
-    let cellTotalFisik = newRow.insertCell();
-    cellTotalFisik.id = 'total_fisik_' + rowId;
-    cellTotalFisik.setAttribute('data-label', headerLabels[4]);
-    cellTotalFisik.textContent = '0';
-    
-    newRow.insertCell().setAttribute('data-label', headerLabels[5]);
-    newRow.cells[5].innerHTML = createControlCell(6, stokKomputer, true);
-
-    newRow.insertCell().setAttribute('data-label', headerLabels[6]);
-    newRow.cells[6].innerHTML = `<button class="hapus-btn" onclick="resetBarang(${rowId})" style="background-color: #ffc107; color: #333;">Reset</button>`;
-
-    const newSelisihRow = tbodySelisih.insertRow();
-    newSelisihRow.id = 'selisih_row_' + rowId;
-    newSelisihRow.setAttribute('data-provider', providerName); 
-    newSelisihRow.insertCell().textContent = namaAwal;
-
-    let cellSelisih = newSelisihRow.insertCell();
-    cellSelisih.id = 'selisih_nilai_' + rowId;
-    cellSelisih.textContent = '0';
-
-    hitungTotal(rowId);
-}
-
-// --- SOCKET HANDLERS (apply remote changes) ---
-function applyRemoteUpdate(row) {
-    // Cari baris berdasarkan nama paket
-    const rows = document.getElementById('stock-body').rows;
-    for (let i = 0; i < rows.length; i++) {
-        const tr = rows[i];
-        if (tr.cells[0].textContent === row.name) {
-            const rowId = tr.id.split('_')[1];
-            document.getElementById('atas_' + rowId).value = row.atas || 0;
-            document.getElementById('bawah_' + rowId).value = row.bawah || 0;
-            document.getElementById('belakang_' + rowId).value = row.belakang || 0;
-            document.getElementById('komputer_' + rowId).value = row.komputer || 0;
-            hitungTotal(rowId);
-            return;
-        }
-    }
-}
-
-// --- INISIALISASI ---
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        socket = io();
-        socket.on('stock_update', (row) => applyRemoteUpdate(row));
-    } catch (e) {
-        console.warn('Socket.IO tidak tersedia:', e);
-    }
-    await loadServerStocks();
-    await loadAndInitializeData();
-});// script.js - Realtime & Multi-user integration (kept original UX)
+// script.js - Realtime & Multi-user integration (kept original UX)
 
 // --- GLOBAL (server stocks + socket) ---
 let SERVER_STOCKS_MAP = new Map();
@@ -398,8 +120,7 @@ function sendRowUpdate(rowId) {
         total_fisik: parseInt(document.getElementById('total_fisik_' + rowId).textContent) || 0
     };
 
-    // PERBAIKAN: Menggunakan endpoint POST yang benar untuk single update (sinkronisasi)
-    fetch('/api/stocks/update', { 
+    fetch('/api/stocks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -762,12 +483,10 @@ function applyRemoteUpdate(row) {
         const tr = rows[i];
         if (tr.cells[0].textContent === row.name) {
             const rowId = tr.id.split('_')[1];
-            // Update input fields
             document.getElementById('atas_' + rowId).value = row.atas || 0;
             document.getElementById('bawah_' + rowId).value = row.bawah || 0;
             document.getElementById('belakang_' + rowId).value = row.belakang || 0;
             document.getElementById('komputer_' + rowId).value = row.komputer || 0;
-            // Recalculate totals and display changes immediately
             hitungTotal(rowId);
             return;
         }
@@ -777,9 +496,7 @@ function applyRemoteUpdate(row) {
 // --- INISIALISASI ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Inisialisasi Socket.IO
         socket = io();
-        // Listener untuk event pembaruan dari server
         socket.on('stock_update', (row) => applyRemoteUpdate(row));
     } catch (e) {
         console.warn('Socket.IO tidak tersedia:', e);
