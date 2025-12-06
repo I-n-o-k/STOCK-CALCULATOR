@@ -37,20 +37,25 @@
   </package>
   <package>
     <provider>Telkomsel</provider>
-    <validity>8Hari</validity>
-    <quota>7GB</quota>
+    <validity>7Hari</validity>
+    <quota>8GB</quota>
   </package>
     <package>
     <provider>Telkomsel</provider>
     <validity>30Hari</validity>
     <quota>11GB</quota>
   </package>
-    <package>
+  <package>
     <provider>Telkomsel</provider>
     <validity>30Hari</validity>
     <quota>18GB</quota>
   </package>
-  
+
+  <package>
+    <provider>By.u</provider>
+    <validity>3Hari</validity>
+    <quota>3GB</quota>
+  </package>  
   <package>
     <provider>By.u</provider>
     <validity>30Hari</validity>
@@ -66,6 +71,11 @@
     <provider>Axis</provider>
     <validity>1Hari</validity>
     <quota>2GB</quota>
+  </package>
+    <package>
+    <provider>Axis</provider>
+    <validity>2Hari</validity>
+    <quota>5GB</quota>
   </package>
   <package>
     <provider>Axis</provider>
