@@ -4,7 +4,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Pool } = require('pg'); // <-- Ganti: Import Pool dari 'pg'
+const { Pool } = require('pg'); // Import Pool dari 'pg'
 
 const app = express();
 const server = http.createServer(app);
@@ -13,7 +13,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 // === Database setup (PostgreSQL Pool) ===
-// Render secara otomatis menyediakan URL koneksi ke DATABASE_URL
+// Render secara otomatis menggunakan DATABASE_URL dari Environment Variables
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   // Opsi SSL ini penting untuk koneksi yang aman di Render/cloud
@@ -24,8 +24,8 @@ const pool = new Pool({
 
 // Fungsi untuk memastikan tabel ada
 async function initializeDb() {
-    const client = await pool.connect();
     try {
+        const client = await pool.connect();
         await client.query(`
             CREATE TABLE IF NOT EXISTS stocks (
                 name TEXT PRIMARY KEY,
@@ -40,11 +40,13 @@ async function initializeDb() {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        client.release();
         console.log('Database table "stocks" initialized or already exists (PostgreSQL).');
     } catch (err) {
-        console.error('Error initializing database:', err.message);
-    } finally {
-        client.release();
+        console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        console.error('Error connecting to Database or initializing table. Check DATABASE_URL in Render environment.');
+        console.error('Detail Error:', err.message);
+        console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     }
 }
 initializeDb();
@@ -58,7 +60,6 @@ app.use(express.static(__dirname));
 // Get all stocks (for initial hydration)
 app.get('/api/stocks', async (req, res) => {
   try {
-    // Menggunakan pool.query() untuk SELECT
     const result = await pool.query('SELECT * FROM stocks');
     res.json(result.rows || []);
   } catch (err) {
@@ -67,7 +68,7 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
-// Update a single stock item
+// Endpoint untuk pembaruan stok tunggal (Memicu Real-time Update)
 app.post('/api/stocks/update', express.json(), async (req, res) => {
   const { name, atas, bawah, belakang, komputer, total_fisik } = req.body;
   try {
@@ -80,17 +81,31 @@ app.post('/api/stocks/update', express.json(), async (req, res) => {
         total_fisik = $5, 
         updated_at = CURRENT_TIMESTAMP 
       WHERE name = $6 
-      RETURNING *;`; // RETURNING * untuk mendapatkan data yang sudah di-update
+      RETURNING *;`;
     
-    // Menggunakan pool.query() dengan parameter $1, $2, ...
     const result = await pool.query(sql, [atas, bawah, belakang, komputer, total_fisik, name]);
     
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found' });
+      // Jika item tidak ditemukan, coba INSERT (karena mungkin item baru)
+      const { provider, validity, quota } = req.body;
+      const insertSql = `
+        INSERT INTO stocks (name, provider, validity, quota, atas, bawah, belakang, komputer, total_fisik, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
+        RETURNING *;`;
+      
+      const insertResult = await pool.query(insertSql, [name, provider || '', validity || '', quota || '', atas, bawah, belakang, komputer, total_fisik]);
+      
+      if (insertResult.rowCount === 0) {
+          return res.status(500).json({ error: 'Item not found and failed to insert.' });
+      }
+      
+      const updatedRow = insertResult.rows[0];
+      io.emit('stock_update', updatedRow); // Emit pembaruan realtime
+      return res.json({ ok: true, data: updatedRow });
     }
-    
+
     const updatedRow = result.rows[0];
-    io.emit('stock_update', updatedRow); // Emit pembaruan realtime
+    io.emit('stock_update', updatedRow); // <-- INI YANG MEMICU SINKRONISASI
     res.json({ ok: true, data: updatedRow });
   } catch (err) {
     console.error('Single update error:', err.message);
@@ -106,10 +121,9 @@ app.post('/api/stocks/bulk', express.json(), async (req, res) => {
     return res.status(400).json({ error: 'Data items must be a non-empty array' });
   }
 
-  // Menggunakan Client dari Pool untuk menjalankan transaksi
   const client = await pool.connect();
   try {
-    await client.query('BEGIN'); // Mulai transaksi
+    await client.query('BEGIN');
 
     const sql = `
       INSERT INTO stocks (name, provider, validity, quota, atas, bawah, belakang, komputer, total_fisik, updated_at)
@@ -126,7 +140,6 @@ app.post('/api/stocks/bulk', express.json(), async (req, res) => {
         updated_at=CURRENT_TIMESTAMP
     `;
     
-    // Loop melalui setiap item dan jalankan query dengan parameter
     for (const item of items) {
       if (!item || !item.name) continue;
       const {
@@ -137,17 +150,17 @@ app.post('/api/stocks/bulk', express.json(), async (req, res) => {
       await client.query(sql, [name, provider, validity, quota, atas, bawah, belakang, komputer, total_fisik]);
     }
 
-    await client.query('COMMIT'); // Commit transaksi jika berhasil
+    await client.query('COMMIT'); 
     
-    io.emit('stocks_bulk_update', { count: items.length });
+    // Tidak perlu emit sinyal di bulk update, karena ini hanya digunakan untuk sinkronisasi awal
     res.json({ ok: true, count: items.length });
 
   } catch (err) {
-    await client.query('ROLLBACK'); // Rollback jika ada error
+    await client.query('ROLLBACK'); 
     console.error('Bulk update transaction failed:', err.message);
     res.status(500).json({ error: err.message });
   } finally {
-    client.release(); // Lepaskan client kembali ke pool
+    client.release();
   }
 });
 
@@ -155,6 +168,7 @@ app.post('/api/stocks/bulk', express.json(), async (req, res) => {
 // === Socket.IO ===
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
+  // Tambahkan logika lain jika diperlukan saat koneksi
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
