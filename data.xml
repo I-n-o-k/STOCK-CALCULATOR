@@ -3,7 +3,7 @@
   <package>
     <provider>Telkomsel</provider>
     <validity>1Hari</validity>
-    <quota>2GB</quota>
+    <quota>4GB</quota>
   </package>
     <package>
     <provider>Telkomsel</provider>
@@ -43,12 +43,12 @@
     <package>
     <provider>Telkomsel</provider>
     <validity>30Hari</validity>
-    <quota>11GB</quota>
+    <quota>10GB</quota>
   </package>
   <package>
     <provider>Telkomsel</provider>
     <validity>30Hari</validity>
-    <quota>18GB</quota>
+    <quota>20GB</quota>
   </package>
 
   <package>
@@ -57,15 +57,6 @@
     <quota>3GB</quota>
   </package>  
   <package>
-    <provider>By.u</provider>
-    <validity>30Hari</validity>
-    <quota>3GB</quota>
-  </package>
-  <package>
-    <provider>By.u</provider>
-    <validity>30Hari</validity>
-    <quota>7GB</quota>
-  </package>
 
   <package>
     <provider>Axis</provider>
@@ -181,11 +172,6 @@
   <package>
     <provider>Three</provider>
     <validity>5Hari</validity>
-    <quota>2GB</quota>
-  </package>
-  <package>
-    <provider>Three</provider>
-    <validity>5Hari</validity>
     <quota>5GB</quota>
   </package>
   <package>
@@ -244,21 +230,11 @@
     <validity>7Hari</validity>
     <quota>7GB</quota>
   </package>
-  <package>
-    <provider>Indosat</provider>
-    <validity>30Hari</validity>
-    <quota>3GB</quota>
-  </package>
 
   <package>
     <provider>XL</provider>
     <validity>3Hari</validity>
     <quota>2.5GB</quota>
-  </package>
-  <package>
-    <provider>XL</provider>
-    <validity>7Hari</validity>
-    <quota>3.5GB</quota>
   </package>
   <package>
     <provider>XL</provider>
@@ -383,4 +359,3 @@
     <quota>Smartfren</quota>
   </package>
 </data-packages>
-
