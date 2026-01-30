@@ -217,6 +217,11 @@
   </package>
   <package>
     <provider>Indosat</provider>
+    <validity>2Hari</validity>
+    <quota>5GB</quota>
+  </package>
+  <package>
+    <provider>Indosat</provider>
     <validity>5Hari</validity>
     <quota>2.5GB</quota>
   </package>
@@ -323,7 +328,12 @@
     <validity>3GB</validity>
     <quota>Telkomsel</quota>
   </package>
-      <package>
+  <package>
+    <provider>Perdana</provider>
+    <validity>8GB</validity>
+    <quota>Three</quota>
+  </package>
+  <package>
     <provider>Perdana</provider>
     <validity>3GB</validity>
     <quota>Three</quota>
@@ -341,6 +351,11 @@
   <package>
     <provider>Perdana</provider>
     <validity>3GB</validity>
+    <quota>Axis</quota>
+  </package>
+  <package>
+    <provider>Perdana</provider>
+    <validity>6GB</validity>
     <quota>Axis</quota>
   </package>
     <package>
