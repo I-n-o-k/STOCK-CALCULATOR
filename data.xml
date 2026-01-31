@@ -18,7 +18,7 @@
   <package>
     <provider>Telkomsel</provider>
     <validity>3Hari</validity>
-    <quota>3GB</quota>
+    <quota>4GB</quota>
   </package>
   <package>
     <provider>Telkomsel</provider>
@@ -38,7 +38,7 @@
   <package>
     <provider>Telkomsel</provider>
     <validity>7Hari</validity>
-    <quota>8GB</quota>
+    <quota>10GB</quota>
   </package>
     <package>
     <provider>Telkomsel</provider>
@@ -56,7 +56,6 @@
     <validity>3Hari</validity>
     <quota>3GB</quota>
   </package>  
-  <package>
 
   <package>
     <provider>Axis</provider>
@@ -131,11 +130,6 @@
   <package>
     <provider>Axis</provider>
     <validity>30Hari</validity>
-    <quota>3GB</quota>
-  </package>
-  <package>
-    <provider>Axis</provider>
-    <validity>30Hari</validity>
     <quota>6GB</quota>
   </package>
   <package>
@@ -172,6 +166,11 @@
   <package>
     <provider>Three</provider>
     <validity>5Hari</validity>
+    <quota>2GB</quota>
+  </package>
+  <package>
+    <provider>Three</provider>
+    <validity>5Hari</validity>
     <quota>5GB</quota>
   </package>
   <package>
@@ -187,7 +186,7 @@
   <package>
     <provider>Three</provider>
     <validity>30Hari</validity>
-    <quota>9GB</quota>
+    <quota>10GB</quota>
   </package>
   <package>
     <provider>Three</provider>
@@ -259,7 +258,7 @@
     <package>
     <provider>XL</provider>
     <validity>30Hari</validity>
-    <quota>4GB</quota>
+    <quota>6GB</quota>
   </package>
   <package>
     <provider>XL</provider>
@@ -285,12 +284,12 @@
   <package>
     <provider>Smartfren</provider>
     <validity>3Hari</validity>
-    <quota>2.5GB</quota>
+    <quota>4GB</quota>
   </package>
   <package>
     <provider>Smartfren</provider>
     <validity>7Hari</validity>
-    <quota>4GB</quota>
+    <quota>6GB</quota>
   </package>
   <package>
     <provider>Smartfren</provider>
@@ -328,14 +327,14 @@
     <validity>3GB</validity>
     <quota>Telkomsel</quota>
   </package>
-  <package>
-    <provider>Perdana</provider>
-    <validity>8GB</validity>
-    <quota>Three</quota>
-  </package>
-  <package>
+    <package>
     <provider>Perdana</provider>
     <validity>3GB</validity>
+    <quota>Three</quota>
+  </package>
+    <package>
+    <provider>Perdana</provider>
+    <validity>8GB</validity>
     <quota>Three</quota>
   </package>
     <package>
